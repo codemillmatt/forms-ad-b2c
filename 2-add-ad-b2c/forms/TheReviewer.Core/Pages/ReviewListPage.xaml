@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage 
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+    x:Class="TheReviewer.Core.ReviewListPage"
+    Title="{Binding Title}">
+    <ContentPage.Content>
+        <ListView ItemsSource="{Binding AllReviews}" IsRefreshing="{Binding IsBusy}" IsPullToRefreshEnabled="true" RefreshCommand="{Binding RefreshCommand}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Text}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </ContentPage.Content>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Login" Command="{Binding LoginCommand}" IsEnabled="{Binding LoggedOut}" />
+    </ContentPage.ToolbarItems>
+</ContentPage>
