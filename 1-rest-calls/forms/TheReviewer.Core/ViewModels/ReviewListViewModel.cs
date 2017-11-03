@@ -23,9 +23,17 @@ namespace TheReviewer.Core
         (_refreshCommand = new Command(async () =>
         {
             var baseAddr = new Uri("http://localhost:5000");
+
             var client = new HttpClient { BaseAddress = baseAddr };
 
-            var reviews = await client.GetStringAsync("/api/values");
+            // The quick method
+            var reviews = await client.GetStringAsync("/api/reviews");
+
+            // Not so quick method
+            //var req = new HttpRequestMessage(HttpMethod.Get, "/api/reviews");
+            //var resp = await client.SendAsync(req);
+            //resp.EnsureSuccessStatusCode();
+            //var reviews = await resp.Content.ReadAsStringAsync();
 
             var allReviews = JsonConvert.DeserializeObject<List<Review>>(reviews);
 
