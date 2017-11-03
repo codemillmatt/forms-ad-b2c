@@ -1,8 +1,14 @@
-The whole point of AD B2C is to have a means of providing authentication between a front end client and a back end resource.
+The whole point of [AD B2C](https://msou.co/6l) is to have a means of providing authentication between a front end client and a back end resource.
+
+In this article I'm going to cover some foundational steps before implementing any authentication. Namely I want to talk about how to invoke any web call with Xamarin. After that I'll get into how to setup the basics of the demo app for the solution.
+
+But first, an overview of what the demo app is comprised of.
 
 ## The Demo App
 
-For the case of this blog series, I'm going to build up a Xamarin.Forms app that displays restuarant reviews. 
+For the case of this [blog series](https://msou.co/6k), I'm going to build up a Xamarin.Forms app that both displays and records restaurant reviews. 
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_800/v1509730731/PNG_image-3AF62C84331D-1_lj1hud.png)
 
 The backend will be a .NET core Web API which will be responsible for persisting and returning data to the Xamarin.Forms app.
 
@@ -14,13 +20,15 @@ We also want to be sure each and every user signs up for our app, and then is lo
 
 Before I get into actually implementing the sign-up and sign-in authentication with AD B2C, I want to take a step back and talk about how to both setup a basic .NET Core Web API and invoke/consume it from a Xamarin.Forms app.
 
-This is something that I get asked about a lot when I speak at conferences, how can Xamarin - in the core project - consume web services? So I definitely want to cover it before moving on.
+Something that I get asked about a lot when I speak at conferences is, how can Xamarin - in the core project - consume web services? So I really want to devote an entire post to talking about that before moving on to the actual authentication.
 
-So I'm going to break this post down into 2 parts - a tl;dr; where you can find out exactly how to call web services, and then a longer part where I'll go through how I set the solution that I'll be using throughout the rest of the series on AD B2C.
+I'm going to break this post down into 2 parts - a tl;dr; where you can find out exactly how to call web services, and then a longer part where I'll go through how I set the solution that I'll be using throughout the rest of the series on AD B2C.
 
 ## The tl;dr; Calling the Web Service
 
 Xamarin unleashes the power of the .NET framework for use in both Android and iOS (and Mac, UWP, Tizen, etc.) - so that means we can use the .NET `System.Net.Http.HttpClient` class to invoke and consume web services. We can use `HttpClient` from within the platform projects, but of course it makes more sense to use it from within a core project that's shared across the platforms.
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_800/v1509730731/PNG_image-F40AACD262B3-1_kci8q4.png)
 
 If you're not already familiar with `HttpClient` it provides 2 mechanisms to perform web calls.
 
@@ -37,13 +45,13 @@ var returnedJson = await client.GetStringAsync("/api/reviews");
 // Do some work with the JSON in returnedJson
 ```
 
-So in this example - we're able to query `http://localhost:5000/api/reviews` via a GET and then handle a string it returns (which could be any string - but we'll assume JSON in this case). Then we could use Newtonsoft.Json to handle it. (The `HttpClient` also has other functions such as `GetStreamAsync, DeleteAsync, PostAsync, PutAsync').
+So in this example - we're able to query `http://localhost:5000/api/reviews` via a GET and then handle a string it returns (which could be any string - but we'll assume JSON in this case). Then we could use Newtonsoft.Json to handle it. (The `HttpClient` also has other functions such as `GetStreamAsync, DeleteAsync, PostAsync, PutAsync`).
 
 However, if we wanted to be more explicit as to what we're up to (and that's probably not a bad thing) - like when setting the headers in the request - then we would have to use 2 other objects - `HttpRequestMessage` and `HttpResponseMessage`.
 
 So, the same request as above would look like the following then:
 
-```language-csharp
+``` language-csharp
 var req = new HttpRequestMessage(HttpMethod.Get, "/api/reviews");
 
 var resp = await client.SendAsync(req);
@@ -60,29 +68,30 @@ Now... I want to give a rundown of how the projects are setup for the rest of th
 
 ## Setting up the .NET Core Web API
 
-One thing to note - at least in this sample - I don't have much exception handling or anything along those lines setup. My main goal is to demonstrate how to invoke a web call and get the foundation of the projects setup... fair warning :).
+_One thing to note - at least in this sample - I don't have much exception handling or anything along those lines setup. My main goal is to demonstrate how to invoke a web call and get the foundation of the projects setup... fair warning :)._
 
-I'm not a web developer ...so ASP.NET Core is (was) a complete mystery to me. (So this is my way of saying ... if I get something wrong here - let me know!)
+I'm not a web developer ...so [ASP.NET Core](https://msou.co/6n) is (was) a complete mystery to me. (So this is my way of saying ... if I get something wrong here - let me know!)
 
 But I want to get it down in writing so everybody can follow along.
 
 ### Creating the project
 
-I used VS Code on a Mac to create the Web API - which means I am also using the .NET CLI to create the projects.
+I used [VS Code on a Mac to create the Web API](https://msou.co/6m) - which means I am also using the .NET CLI to create the projects.
 
 In order to create a new Web API project, navigate to a folder where you want the project to live, open up the terminal, and issue the following:
 
 ```language-bash
-dotnet new webapi -n <NAME OF YOUR WEB API PROJECT>
+dotnet new webapi -n "NAME OF YOUR WEB API PROJECT"
 dotnet restore
 dotnet run
+
 ```
 
 The first command will create the Web API project will all of the necessary files. 
 
 The second command will restore all the NuGet packages.
 
-And fter issuing the `dotnet run` command a web server will start up and you will be able to browse to `http://localhost:5000/api/values` and should see some JSON returned.
+And after issuing the `dotnet run` command a web server will start up and you will be able to browse to `http://localhost:5000/api/values` and should see some JSON returned.
 
 ### Creating the Reviews Controller
 
@@ -129,7 +138,7 @@ Cool.
 
 ## The Xamarin.Forms Project
 
-Finally ... finally we're at how to invoke a web service!
+Finally ... at the Xamarin.Forms project and invoking web services (well, that is if you skipped the tl;dr; from above).
 
 Easy part, create a Xamarin.Forms solution. Semi, easy part - convert it to a .netstandard core project.
 
