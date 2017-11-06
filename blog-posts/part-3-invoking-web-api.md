@@ -1,4 +1,4 @@
-The whole point of [AD B2C](https://msou.co/6l) is to have a means of providing authentication between a front end client and a back end resource.
+The whole point of [Azure AD B2C](https://msou.co/6l) is to both have a means of providing authentication between a front end client and a back end resource, and to obtain an access token which can be used for authorization purposes.
 
 In this article I'm going to cover some foundational steps before implementing any authentication. Namely I want to talk about how to invoke any web call with Xamarin. After that I'll get into how to setup the basics of the demo app for the solution.
 
@@ -18,13 +18,15 @@ We also want to be sure each and every user signs up for our app, and then is lo
 
 ## But What's This Post About?
 
-Before I get into actually implementing the sign-up and sign-in authentication with AD B2C, I want to take a step back and talk about how to both setup a basic .NET Core Web API and invoke/consume it from a Xamarin.Forms app.
+Before I get into actually implementing the sign-up and sign-in authentication with Azure AD B2C, I want to take a step back and talk about how to both setup a basic .NET Core Web API and invoke/consume it from a Xamarin.Forms app.
 
 Something that I get asked about a lot when I speak at conferences is, how can Xamarin - in the core project - consume web services? So I really want to devote an entire post to talking about that before moving on to the actual authentication.
 
-I'm going to break this post down into 2 parts - a tl;dr; where you can find out exactly how to call web services, and then a longer part where I'll go through how I set the solution that I'll be using throughout the rest of the series on AD B2C.
+I'm going to break this post down into 2 parts - a tl;dr; where you can find out exactly how to call web services, and then a longer part where I'll go through how I set the solution that I'll be using throughout the rest of the series on Azure AD B2C.
 
 ## The tl;dr; Calling the Web Service
+
+First off, all of the code for this post can be found in [GitHub here](https://msou.co/6q), so go ahead clone it and have some fun!
 
 Xamarin unleashes the power of the .NET framework for use in both Android and iOS (and Mac, UWP, Tizen, etc.) - so that means we can use the .NET `System.Net.Http.HttpClient` class to invoke and consume web services. We can use `HttpClient` from within the platform projects, but of course it makes more sense to use it from within a core project that's shared across the platforms.
 
@@ -64,7 +66,7 @@ Here the `HttpRequestMessage` allows us to explicitly set the HTTP verb to use. 
 
 Using `System.Net.Http` is the way to go when communicating to the web with Xamarin.
 
-Now... I want to give a rundown of how the projects are setup for the rest of the AD B2C blog series.
+Now... I want to give a rundown of how the projects are setup for the rest of the Azure AD B2C blog series.
 
 ## Setting up the .NET Core Web API
 
@@ -72,7 +74,7 @@ _One thing to note - at least in this sample - I don't have much exception handl
 
 I'm not a web developer ...so [ASP.NET Core](https://msou.co/6n) is (was) a complete mystery to me. (So this is my way of saying ... if I get something wrong here - let me know!)
 
-But I want to get it down in writing so everybody can follow along.
+But I want to get it down in writing so everybody can follow along. Of course, what better way to follow along than to grab the code from [GitHub](https://msou.co/6q)
 
 ### Creating the project
 
@@ -138,7 +140,7 @@ Cool.
 
 ## The Xamarin.Forms Project
 
-Finally ... at the Xamarin.Forms project and invoking web services (well, that is if you skipped the tl;dr; from above).
+Finally ... at the Xamarin.Forms project and invoking web services (well, that is if you skipped the tl;dr; from above). (The [GitHub](https://msou.co/6q) code...)
 
 Easy part, create a Xamarin.Forms solution. Semi, easy part - convert it to a .netstandard core project.
 
@@ -186,4 +188,4 @@ But the big, big point of all this is that you can invoke web services fairly ea
 
 And there are 2 ways you can get data ... and quick and easy way by using functions directly off of `HttpClient` and a way that provides more functionality by using `HttpRequest` and `HttpResponse` in combinatino with `HttpClient`.
 
-In the next post, I'll take a look at getting the Xamarin.Forms app to use AD B2C to authenticate with Azure, and then use that authentication token to retrieve data from a "locked down" ASP.NET Web API.
+In the next post, I'll take a look at getting the Xamarin.Forms app to use Azure AD B2C to authenticate with Azure, and then use that authentication token to retrieve data from a "locked down" ASP.NET Web API.
