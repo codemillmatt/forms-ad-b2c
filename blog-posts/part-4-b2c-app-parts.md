@@ -51,11 +51,11 @@ For our purposes, there are 3 different types of policies, and their purpose sho
 * Profile editing policies
 * Password reset policies
 
-So here's what's cool about these policies... when you configure one, you get to make several decisions to make about their behavior! (Because we're developers and we like control!)
+So here's what's cool about these policies... when you configure one, you get to make several decisions about their behavior! (Because we're developers and we like control!)
 
 1. Which identity providers to allow. (So you could have a sign-in and sign-up policy that only allows Twitter authentication.)
 1. For sign-up, you can decide which of the user attributes you want to have collected.
-1. You can also then decide which _Claims_ or of __all the user attributes defined in the Tenant__ which should be returned to the mobile app. So it's possible to collect more info than the app will have access to. And the opposite is also true - you can return more attributes to the app than was requested during the sign-up process. _These user attributes being returned to the mobile app will be done so within a token as a claim. That's important, which is why this is in bold._
+1. You can also then decide which _Claims_ or of __all the user attributes defined in the Tenant__ which should be returned to the mobile app. So it's possible to collect more info during sign-up than the app will have access to in every day usage. And the opposite is also true - you can return more attributes to the app than was requested during the sign-up process. _These user attributes being returned to the mobile app will be done so within a token as a claim. That's important, which is why this is in bold._
 1. Whether to turn multi-factor authentication on or off.
 
 There will also be settings to tweak for how long the token lifetime should be and so on.
@@ -84,11 +84,11 @@ Unlike everything else I talked about up to this point, scopes are not defined a
 
 A scope is something the mobile application requests from the Azure AD B2C application as part of the authorization process. And it is a permission to the Azure AD B2C application. _But it's not a user-level permission._
 
-The way I think about is like a party ... say there's a scope defined named: "raging-party".
+The way I think about is like a party ... say there's a scope defined named: "raging-party". At this point in the workflow, the user of the app has already been authenticated...
 
-Your mobile app then says: 
+The mobile app knocks on the door: 
 
-_"Dearest Azure AD B2C application. I humbly request that this user ... which __YOU - Azure AD B2C Service__ have already authenticated for me and guarantee is who they say they are ... be granted an authorization token with this scope, which goes by the name of raging-party. In other words ... please, please, please can I come in to the party?"_
+_"Dearest Azure AD B2C application. I humbly request that this user ... which __YOU - Azure AD B2C Service__ have already authenticated for me previously using something like Twitter, and guarantee is who they say they are ... be granted an authorization token with this scope, which goes by the name of raging-party. In other words ... please, please, please can I come in to the party?"_
 
 The Azure AD B2C application - seeing that the scope the mobile app is requesting is legit, will generate an authorization token for that scope.
 
