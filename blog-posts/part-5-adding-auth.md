@@ -1,10 +1,10 @@
 Finally - we're at the point in this series where I show how to use Azure AD B2C to authenticate a user and then authorize that user to hit a Web API from a Xamarin.Forms application!
 
-In other words - we're at the post with the official, and long, title of...
+In other words - we're at the post with the very official, and very long, title of...
 
 # Authenticating and Authorizing a Mobile App to Use a Web API via Azure AD B2C
 
-In the first couple of posts, we learned what [Azure AD B2C is](https://msou.co/6z), how to [create a Tenant](https://msou.co/60) (which I found a bit tricky), then took a quick detour to find out how to [invoke a Web API](https://msou.co/61) from a Xamarin.Forms app - because that's going to be our backing service which will be "protected". Then in the [final post before this one](https://msou.co/7j), we learned what everything is inside of Azure AD B2C... and how it relates together. And the info from that post is going to come in very handy here!
+In the first couple of posts, we learned what [Azure AD B2C is](https://msou.co/6z), how to [create a Tenant](https://msou.co/60) (which I found a bit tricky, I even created a [video](https://msou.co/7g) to help explain it), then took a quick detour to find out how to [invoke a Web API](https://msou.co/61) from a Xamarin.Forms app - and that's going to be our backing service which will be "protected". Then in the [final post before this one](https://msou.co/7j), we learned what everything is inside of Azure AD B2C... and how it relates together. And the info from that post is going to come in very handy here!
 
 In order to get this all to work, there are 3 parts we have to go through.
 
@@ -22,7 +22,9 @@ A lot of these steps are "set 'em and forget 'em" ... so they're important to go
 
 The drawing below illustrates the process the mobile app, Azure AD B2C, and the Web API take in order to provide access to a secured method on the Web API controller.
 
-## Step 1 - Creating a Policy
+## Configuring the Azure AD B2C Application
+
+### Step 1 - Creating a Policy
 
 We need to do some work in the portal. I'm going to go relatively fast through all of this as all of the concepts used here was explained in the [previous post](https://msou.co/7j).
 
@@ -34,7 +36,7 @@ Once there, select the Azure AD B2C option from the menu on the far left side:
 
 ![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512490254/Screen_Shot_2017-12-05_at_10.10.29_AM_x2icov.png)
 
-First off we need to create a policy for the Azure AD B2C Tenant.
+We need to create a policy for the Azure AD B2C Tenant.
 
 Select __Sign-up or sign-in policies__ from the left-hand menu.
 
@@ -54,9 +56,13 @@ Email signup allows a user to sign up and sign in using their email address and 
 
 The __Sign-up attributes__ declare what fields you want to have collected when a user registers for the app. Choose what you will.
 
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1512589498/Screen_Shot_2017-12-06_at_1.44.06_PM_u63lns.png)
+
 The __Application claims__ determines which of the __Sign-up attributes__ values will be returned to the mobile app _after_ the user signs-in.
 
-Go ahead and click __Create__.
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1512589619/Screen_Shot_2017-12-06_at_1.46.36_PM_lwbpoq.png)
+
+Once you have those two done - leave the rest as is... go ahead and click __Create__.
 
 ## Step 2 - Setting Up The Azure AD B2C Application
 
@@ -102,19 +108,21 @@ Hit the __Published scopes (Preview)__ menu option. Then in the new blade enter 
 
 ### API Access
 
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512589969/Screen_Shot_2017-12-06_at_1.52.32_PM_xbqcdn.png)
+
 Now to enable API Access. Hit the __API Access (Preview)__ menu option right above the scopes one, click __Add__, and then the available API should be your Azure AD B2C name.
 
 You should also see the scope you just created in it as well.
 
 We are done configuring the portal!! 🎉
 
-## Changes to the Web API
+## Step 3 - Changes to the Web API
 
-What we're going to do is make the WebAPI make use of Azure AD B2C. So we're going to have to do some refactoring to the Web API that was created [before](https://msou.co/61).
+Next we're going to make the Web API utilitize Azure AD B2C. In order to do that, we're going to have to do some refactoring to the Web API that was created [before](https://msou.co/61).
 
 ### AppSettings
 
-We need to first update the appsettings.json - only to avoid hardcoding constants.
+We need to first update the appsettings.json - only to avoid hardcoding constants in the code itself.
 
 The new portion of the file will look like:
 
@@ -201,11 +209,11 @@ Now we're all setup. If we had the mobile app try to invoke the Web API right no
 
 Of course - you're going to want to deploy the app to Azure now.
 
-## Updating the Xamarin.Forms App
+## Step 4 - Updating the Xamarin.Forms App
 
 We're in the homestretch now!!
 
-We're going to use the [Microsoft.Identity.Client](https://msou.co/7k) NuGet package (or MSAL) to take care of communicating to Azure AD B2C (and caching the tokens in respsonse) for us. This removes a lot of work on our end. (The package is in preview - but the team is supporting it, and says you can use it in production environments).
+We're going to use the [Microsoft.Identity.Client](https://msou.co/7k) NuGet package (or MSAL) to take care of communicating to Azure AD B2C (and caching the tokens in respsonse) for us. This removes a lot of work on our end. (The package is in preview - [but the team is supporting it](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet), and says you can use it in production environments).
 
 Add that package to the platform projects and to the core Forms project.
 
@@ -220,16 +228,15 @@ public static string Tenant = "TheReviewer.onmicrosoft.com";
 public static string ClientID = "978f6a35-db30-44fd-8544-b7cc40466adc";
 public static string SignUpAndInPolicy = "B2C_1_GenericSignUpAndIn";
 
-public static string[] Scopes = new string[] { "https://TheReviewer.onmicrosoft.com/backend/rvw.read.only" };
-public static string ApiEndpoint = "http://thereviewer.azurewebsites.net/api/reviews";
-
 public static string AuthorityBase = $"https://login.microsoftonline.com/tfp/{Tenant}/";
 public static string Authority = $"{AuthorityBase}{SignUpAndInPolicy}";
+
+public static string[] Scopes = new string[] { "https://TheReviewer.onmicrosoft.com/backend/rvw.read.only" };
 ```
 
 These function as configuration settings. The `Tenant`, `ClientID`, and `SignUpAndInPolicy` values should be evident where they came from.
 
-The `ApiEndpoint` is the resource we want the mobile app to invoke.
+The `Authority` is the endpoint we call to perform the authorization - it's created by using the 3 values that are defined before it.
 
 Finally - the `Scopes[]` array. This is going to be the __App ID URI__ from the __Web API__ configuration in the portal (it said it was optional - but I said we would eventually need it - and now's the time)! And it's followed by the scope name that we want to invoke.
 
@@ -252,7 +259,7 @@ public App()
 }
 ```
 
-The `PublicClientApplication` object is what facilitates the communication to Azure AD B2C. And in the constructor, you can see how we're using the configuration variables to intialize various properties. (And look at the `RedirectUri` - looks familiar, eh?)
+The `PublicClientApplication` object is what facilitates the communication to Azure AD B2C. And in the constructor, you can see how we're using the configuration variables to intialize various properties. (And look at the `RedirectUri` - looks familiar, eh? It's the __Custom Redirect URI__ from the __Native client__ section in the portal.)
 
 While the `UIParent` is a class which is used by Android ... which I'll get to in a second...
 
@@ -279,6 +286,7 @@ The added section looks like this:
     </dict>
 </array>
 ```
+
 The __CFBundleURLName__ is your app's bundle name. The __CFBundleUrlSchemes__ is obtained from the Azure AD B2C application's blade under the native client section. It's the __Custom Redirect URI__ minus the `://auth` at the end.
 
 Then we need to override the `OpenUrl` function in the `AppDelegate`. It's pretty straight forward and will look like this:
@@ -296,6 +304,8 @@ The `AuthenticationContinuationHelper` is from the MSAL library, and it's there 
 
 ### Android Specific Steps
 
+> Please note: MSAL 1.1.0-preview will throw an exception with any version of Android using the version 25.x and above support libraries. Hopefully by the time you read this there is a newer version out there, and everything works great.
+
 In the Android app's `MainActivity`, we need to set that `UIParent` property. That's going to be done in the `OnCreate` function and will look like this:
 
 ```language-csharp
@@ -304,7 +314,76 @@ App.UiParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
 
 This `App.UiParent` allows the MSAL to show the web view using the current Android activity.
 
+Then we need to modify the `AndroidManifest.xml` file.
+
+Add this into the `<application>` element:
+
+```language-xml
+<activity android:name="microsoft.identity.client.BrowserTabActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="msal978f6a35-db30-44fd-8544-b7cc40466adc" android:host="auth" />
+    </intent-filter>
+</activity>
+```
+
+That new `<activity>` element is defining a browser "window" that can open ... and it's going to be used for the web view that lets users sign up or sign in to our app.
+
 ### Sending Requests to Azure AD B2C
 
-Finally ... finally ... FINALLY!!!! We're at the moment of actually invoking the Azure AD B2C to authenticate & then authorize to a service.
+There's 2 functions that are members of the `PublicClientApplication` class from the MSAL library which we're going to use to get the correct tokens in order to make the Web API call.
 
+The first is: `AcquireTokenSilentAsync` and the other is: `AcquireTokenAsync`.
+
+Obviously they are both getting tokens somehow - but the silent version will first check to see if there already is a token stored on the device first before invoking showing the web view and having the user sign in.
+
+Both of those functions will return an `AuthenticationResult` object. And it's that object which will hold the Access token we need.
+
+Check out the Xamarin.Forms [sample app](https://msou.co/7l) to see all of the backing code.
+
+### Sending the Token to the Web API
+
+Finally - we have to send the access token that was retrieved from Azure AD B2C to the Web API - so we can invoke the function we're after.
+
+That involves refactoring the how we performed the HTTP call from a [previous post](https://msou.co/61) into the following:
+
+```language-csharp
+var baseAddr = new Uri(location);
+var client = new HttpClient { BaseAddress = baseAddr };
+
+var reviewUri = new Uri(baseAddr, "api/reviews");
+var request = new HttpRequestMessage(HttpMethod.Get, reviewUri);
+request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
+
+var response = await client.SendAsync(request);
+response.EnsureSuccessStatusCode();
+
+var reviewJson = await response.Content.ReadAsStringAsync();
+```
+
+Let's walk through this...
+
+The `location` variable is the base URL of the Web API we want to get at - so we make a `Uri` out of it.
+
+Then the `reviewUri` is the full URL to the exact endpoint we want to invoke - in this case the `reviews` controller.
+
+Then the new stuff:
+
+Instead of just using the `HttpClient` to invoke the Web API - I'm creating a new `HttpRequestMessage` object - and I'm saying it will perform a GET operation - and what URL to hit.
+
+Then I'm setting the `Headers.Authorization` property - or the authorization headers. And it's going to be a `"Bearer"` with the value of the token obtained via the one of the `AquireToken` MSAL calls.
+
+Finally - I send the request through the `client` and then get a `response` from that. Read the `response.Content` and that's all there is to it!!
+
+## Conclusion
+
+This was a long post - and luckily most everything done in Step 1 and Step 2, will only have to be done once. Number 3 and 4 are done when you're developing the app - so those will become second nature after a while.
+
+The quick rundown again is:
+
+1. Setup Azure AD B2C in the portal - creating the policies and defining the user attributes to collect & return.
+1. Setup the Azure AD B2C application in the portal - defining various callback URLs and scopes.
+1. Get that Web API to use authentication & authorization via Azure AD B2C.
+1. Enable the mobile app to do the same - including with the Microsoft Client Identity Library - or MSAL.
