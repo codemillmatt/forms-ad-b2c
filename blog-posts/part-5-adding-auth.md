@@ -8,13 +8,14 @@ In the first couple of posts, we learned what [Azure AD B2C is](https://msou.co/
 
 In order to get this all to work, there are 3 parts we have to go through.
 
-1. Configure our Azure AD B2C tenant and application within portal.
+1. Configure our Azure AD B2C tenant in the portal
+1. Create the Azure AD B2C application within portal.
 1. Modify the WebAPI application to only return data if it receives an authorization token.
 1. Modify the Xamarin.Forms app to request the token from Azure AD B2C and then send the authorization token on to the Web API.
 
-Actually, there's a fourth part - and that's to down the beverage of your choice - possibly through a funnel.
+Actually, there's a fifth part - and that's to down the beverage of your choice - possibly through a funnel.
 
-I say that because this post is going to be long - and a bit dry. It will be a step-by-step guide on getting everything setup and then finally making an authorization to a backend resource.
+I say that because this post is going to be long - and a bit dry. It will be a step-by-step guide on getting everything setup and then finally making a request to a backend service that needs authorization before returning any data.
 
 A lot of these steps are "set 'em and forget 'em" ... so they're important to go over because ... well ... they're easy to forget.
 
@@ -22,9 +23,9 @@ A lot of these steps are "set 'em and forget 'em" ... so they're important to go
 
 The drawing below illustrates the process the mobile app, Azure AD B2C, and the Web API take in order to provide access to a secured method on the Web API controller.
 
-## Configuring the Azure AD B2C Application
+## Step 1 - Configuring the Azure AD B2C Tenant
 
-### Step 1 - Creating a Policy
+### Creating a Policy
 
 We need to do some work in the portal. I'm going to go relatively fast through all of this as all of the concepts used here was explained in the [previous post](https://msou.co/7j).
 
@@ -90,7 +91,7 @@ Leave the default values as is. We'll fill out the the __Custom Redirect URI__ a
 
 Click the __Create__ button.
 
-Now when it creates, the Azure AD B2C application property's blade will open. Within there you'll see an __Application ID__ box. Copy that value to the clipboard.
+After the application has been created, its property blade will open. Within there you'll see an __Application ID__ box. Copy that value to the clipboard.
 
 Then go down to the __Custom Redirect URL__ box under the __Native Client__ section and paste it in - in the following format:
 
@@ -219,7 +220,9 @@ Add that package to the platform projects and to the core Forms project.
 
 ### Core Project Basic Setup
 
-For this initial stage, I'm going to brute force my way into getting everything working. That means I'm going to have some hardcoded static strings and static objects. Eventually I'll refactor all of this into a proper Login Service - but for now I only want to get the thing working.
+For this initial stage, I'm going to brute force my way into getting everything working. That means I'm going to have some hardcoded static strings and static objects. 
+
+Eventually I'll refactor all of this into a proper Login Service - but for now I only want to get the thing working.
 
 So - for some basic setup - in the `App.cs` file - I'm going to add the following strings:
 
@@ -376,6 +379,35 @@ Instead of just using the `HttpClient` to invoke the Web API - I'm creating a ne
 Then I'm setting the `Headers.Authorization` property - or the authorization headers. And it's going to be a `"Bearer"` with the value of the token obtained via the one of the `AquireToken` MSAL calls.
 
 Finally - I send the request through the `client` and then get a `response` from that. Read the `response.Content` and that's all there is to it!!
+
+## Running the App
+
+I've added a Login button to the [sample app](https://msou.co/7l), that allows a user to log in before attempting to retrieve data.
+
+Here's 3 screenshots from the app running on iOS. 
+
+The first is showing the Login button. 
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.29_uz4iui.png)
+
+The second is the screen which appears after the login button is pressed - this gives the user the ability to sign-in if they already have an account - or to create a new account.
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.45_p7quev.png)
+
+And finally, the third screen allows the user to create a new account. Notice the __Display Name__ and __Job Title__ fields, those are from the __User Attributes__ portion of the __Sign Up and Sign In__ policy.
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.52_evxkd5.png)
+
+### Some Quick Notes
+
+* Customize look and feel of login?
+* Always use web view?
+
+In the code you'll see some comments
+
+* Always need to re login
+* Silent does not work on simulator
+* Droid no go
 
 ## Conclusion
 
