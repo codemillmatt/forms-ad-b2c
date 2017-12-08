@@ -10,7 +10,8 @@ In order to get this all to work, there are 3 parts we have to go through.
 
 1. Configure our Azure AD B2C tenant in the portal
 1. Create the Azure AD B2C application within portal.
-1. Modify the WebAPI application to only return data if it receives an authorization token.
+1. Modify the WebAPI application to only return data if it receives an authorization token with the appropriate scopes.
+    1. Although in this quick demo case I'm going to ignore the scope - but don't do that in real life!
 1. Modify the Xamarin.Forms app to request the token from Azure AD B2C and then send the authorization token on to the Web API.
 
 Actually, there's a fifth part - and that's to down the beverage of your choice - possibly through a funnel.
@@ -18,10 +19,6 @@ Actually, there's a fifth part - and that's to down the beverage of your choice 
 I say that because this post is going to be long - and a bit dry. It will be a step-by-step guide on getting everything setup and then finally making a request to a backend service that needs authorization before returning any data.
 
 A lot of these steps are "set 'em and forget 'em" ... so they're important to go over because ... well ... they're easy to forget.
-
-## Authentication and Authorization Flow
-
-The drawing below illustrates the process the mobile app, Azure AD B2C, and the Web API take in order to provide access to a secured method on the Web API controller.
 
 ## Step 1 - Configuring the Azure AD B2C Tenant
 
@@ -61,7 +58,9 @@ The __Sign-up attributes__ declare what fields you want to have collected when a
 
 The __Application claims__ determines which of the __Sign-up attributes__ values will be returned to the mobile app _after_ the user signs-in.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1512589619/Screen_Shot_2017-12-06_at_1.46.36_PM_lwbpoq.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1512743617/Screen_Shot_2017-12-08_at_8.33.06_AM_uvmomn.png)
+
+_Make sure you select the __User's Object ID__, that will be needed by the MSAL library._
 
 Once you have those two done - leave the rest as is... go ahead and click __Create__.
 
@@ -97,7 +96,9 @@ Then go down to the __Custom Redirect URL__ box under the __Native Client__ sect
 
 `msal{APPLICATION-ID}://auth`
 
-Weird right? Yeah... but you're going to need it in a bit.
+> Weird right? Yeah... but what this is specifying is a custom URL scheme that the web view which performs the sign-up and sign-in will use to communicate back to the app once the sign-up or sign-in is complete.
+
+> So when we get around to configuring the platform projects, we'll need that value tell the OS that anytime something tries to invoke a URL with `msal{APPLICATION-ID}://auth` ... open our app.
 
 ### Scopes!
 
@@ -109,7 +110,7 @@ Hit the __Published scopes (Preview)__ menu option. Then in the new blade enter 
 
 ### API Access
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512589969/Screen_Shot_2017-12-06_at_1.52.32_PM_xbqcdn.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512745345/Screen_Shot_2017-12-08_at_9.01.52_AM_wcr9te.png)
 
 Now to enable API Access. Hit the __API Access (Preview)__ menu option right above the scopes one, click __Add__, and then the available API should be your Azure AD B2C name.
 
@@ -131,13 +132,17 @@ The new portion of the file will look like:
 "Authentication": {
     "AzureAd": {
       "Tenant": "TheReviewer.onmicrosoft.com",
-      "ClientId": "978f6a35-db30-44fd-8544-b7cc40466adc",
+      "ClientId": "{YOUR_APPLICATION_ID_HERE}",
       "Policy": "B2C_1_GenericSignUpAndIn"
     }
   }
 ```
 
-The __Tenant__ comes from the main blade of the Azure AD B2C tenant. The __Client ID__ comes from the application's page we just created. And the policy is, of course, the policy we created above.
+The __Tenant__ comes from the main blade of the Azure AD B2C tenant, found via the __Overview__ option on the left, and __Domain Name__ on the right.
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512745601/Screen_Shot_2017-12-08_at_9.06.22_AM_cydshi.png)
+
+The __Client ID__ comes from the application's page we just created. And the policy is, of course, the policy we created above.
 
 ### Startup.cs
 
@@ -214,7 +219,9 @@ Of course - you're going to want to deploy the app to Azure now.
 
 We're in the homestretch now!!
 
-We're going to use the [Microsoft.Identity.Client](https://msou.co/7k) NuGet package (or MSAL) to take care of communicating to Azure AD B2C (and caching the tokens in respsonse) for us. This removes a lot of work on our end. (The package is in preview - [but the team is supporting it](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet), and says you can use it in production environments).
+We're going to use the [Microsoft.Identity.Client](https://msou.co/7k) NuGet package (or MSAL) to take care of communicating to Azure AD B2C (and caching the tokens in respsonse) for us. This removes a lot of work on our end. (The package is in preview - [but the team is supporting it](https://msou.co/7t), and says you can use it in production environments).
+
+Also, check out this [post](https://msou.co/7s) for more info on the MSAL.
 
 Add that package to the platform projects and to the core Forms project.
 
@@ -228,7 +235,7 @@ So - for some basic setup - in the `App.cs` file - I'm going to add the followin
 
 ```language-csharp
 public static string Tenant = "TheReviewer.onmicrosoft.com";
-public static string ClientID = "978f6a35-db30-44fd-8544-b7cc40466adc";
+public static string ClientID = "{YOUR_APPLICATION_ID_HERE}";
 public static string SignUpAndInPolicy = "B2C_1_GenericSignUpAndIn";
 
 public static string AuthorityBase = $"https://login.microsoftonline.com/tfp/{Tenant}/";
@@ -270,7 +277,9 @@ AD B2C shows the login portion of its workflow within a web view. That means whe
 
 ### iOS Specific Steps
 
-Over in iOS land - we're going to have to edit the Info.plist file to add a URL type to define a callback URL that gets invoked when the web view is dismissed.
+Over in iOS land - we're going to have to edit the Info.plist file to add a URL type to define a callback URL that gets invoked when the web view is dismissed. 
+
+_(This is the callback stuff I was talking about above when configuring the _Native Application's_ _Custom Redirect URI_ in the portal.)_
 
 The added section looks like this:
 
@@ -284,7 +293,7 @@ The added section looks like this:
         <string>com.codemilltech.TheReviewer</string>
         <key>CFBundleURLSchemes</key>
         <array>
-            <string>msal978f6a35-db30-44fd-8544-b7cc40466adc</string>
+            <string>msal{YOUR_APPLICATION_ID}</string>
         </array>
     </dict>
 </array>
@@ -307,7 +316,7 @@ The `AuthenticationContinuationHelper` is from the MSAL library, and it's there 
 
 ### Android Specific Steps
 
-> Please note: MSAL 1.1.0-preview will throw an exception with any version of Android using the version 25.x and above support libraries. Hopefully by the time you read this there is a newer version out there, and everything works great.
+> Please note: MSAL 1.1.0-preview will throw an exception with any version of Android using the version 25.x and above support libraries. Hopefully by the time you read this there is a newer version out there, and everything works great. (Here's the [GitHub issue](https://msou.co/7u) tracking it.)
 
 In the Android app's `MainActivity`, we need to set that `UIParent` property. That's going to be done in the `OnCreate` function and will look like this:
 
@@ -327,7 +336,7 @@ Add this into the `<application>` element:
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="msal978f6a35-db30-44fd-8544-b7cc40466adc" android:host="auth" />
+        <data android:scheme="msal{YOUR_APPLICATION_ID}" android:host="auth" />
     </intent-filter>
 </activity>
 ```
@@ -336,7 +345,7 @@ That new `<activity>` element is defining a browser "window" that can open ... a
 
 ### Sending Requests to Azure AD B2C
 
-There's 2 functions that are members of the `PublicClientApplication` class from the MSAL library which we're going to use to get the correct tokens in order to make the Web API call.
+There are 2 functions that are members of the `PublicClientApplication` class from the MSAL library which we're going to use to get the correct tokens in order to make the Web API call.
 
 The first is: `AcquireTokenSilentAsync` and the other is: `AcquireTokenAsync`.
 
@@ -350,7 +359,7 @@ Check out the Xamarin.Forms [sample app](https://msou.co/7l) to see all of the b
 
 Finally - we have to send the access token that was retrieved from Azure AD B2C to the Web API - so we can invoke the function we're after.
 
-That involves refactoring the how we performed the HTTP call from a [previous post](https://msou.co/61) into the following:
+That involves going into the Xamarin.Forms core project and refactoring how we performed the HTTP call from a [previous post](https://msou.co/61) into the following:
 
 ```language-csharp
 var baseAddr = new Uri(location);
@@ -400,14 +409,19 @@ And finally, the third screen allows the user to create a new account. Notice th
 
 ### Some Quick Notes
 
-* Customize look and feel of login?
-* Always use web view?
+Both the Web API and the Xamarin.Forms app, as they stand right now, are for demo purposes only. What I mean by that is they work ... but you wouldn't use them in a real world situation - not yet at least.
 
-In the code you'll see some comments
+One of the reasons why is login information is not persisted across app launches, you always need to login.
 
-* Always need to re login
-* Silent does not work on simulator
-* Droid no go
+Another is that the web pages which present the sign-in and sign-up info are basic - we'll need to customize those.
+
+Plus, we'll eventually want to restrict access to certain parts of the app and Web API based on who is logged in.
+
+If those some like something that will be covered in future posts ... you're right on with that!
+
+Also - at least for now, the MSAL does not work on Android, but that will be fixed soon.
+
+And check out the comments in the code, the iOS simulator since iOS 10 is a bit funky with the way it handles persisting things - although on device it works fine.
 
 ## Conclusion
 
@@ -417,5 +431,17 @@ The quick rundown again is:
 
 1. Setup Azure AD B2C in the portal - creating the policies and defining the user attributes to collect & return.
 1. Setup the Azure AD B2C application in the portal - defining various callback URLs and scopes.
-1. Get that Web API to use authentication & authorization via Azure AD B2C.
+1. Get that Web API to use authorization via Azure AD B2C.
 1. Enable the mobile app to do the same - including with the Microsoft Client Identity Library - or MSAL.
+
+## What Comes Next?
+
+This post serves as something of a bridge ... it lays a lot of necessary groundwork so we can get to the cool stuff.
+
+So what comes next? 
+
+Well - we'll definitely want to fix the issues I note in the _Some Quick Notes_ section.
+
+I also plan on adding in the ability to authenticate via social providers like Twitter or Facebook. 2-Factor authentication is a very important security measure, and I'll implement that as well.
+
+I will also cover how to integrate Azure AD B2C into various Azure App Services, such as Functions and Mobile App Service.
