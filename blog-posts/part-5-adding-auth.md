@@ -76,13 +76,11 @@ Then as you select __Yes__ to those options - a whole bunch of new options are g
 
 ### Web API Configuration
 
-The __Reply Url__ under the __Web API__ section specifies the web address that you want a "cool / not cool" reply to go to from Azure AD B2C when the Web API asks if it's OK to allow an HTTP request through.
+> Note, you only need to select __Yes__ to this part if you're doing something _in addition_ to the Web API which you're securing. If you only have a single Web API that has protected endpoints, and nothing else, you can leave this as __No__.
 
-This is going to be the _real_ URL the endpoint which the Xamarin.Forms app will invoke resides at.
+The __Reply Url__ under the __Web API__ section specifies a web address that you want a "cool / not cool" reply to go to _if a web app were requesting any authorization tokens_. Since we're not doing that - put any old URL in here.
 
-As you can see - we can specify more than 1 address - but for the purpose of this demo, only a single one is needed.
-
-Next up is the __App ID URI__ ... it says it's optional. Fill it out - you're going to need it. It doesn't need to resolve to anything - but make it unique.
+Next up is the __App ID URI__ ... it says it's optional. Fill it out - we'll use it later. It doesn't need to resolve to anything - but make it unique. _(And don't worry if you're not doing this section - just think of something you would have put here, as I mentioned, it doesn't need to resolve.)
 
 ### Native Client Configuration
 
