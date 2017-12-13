@@ -2,9 +2,13 @@ In the sixth chapter of the using mobile apps with Azure AD B2C series - we're g
 
 # Social Authentication in Azure AD B2C
 
-If you've been following along with this series you should have a ASP.NET Core Web API app which requires authorization in order to return data and a Xamarin.Forms app using the MSAL library. And if you've really been following along - the Forms app should be able to retrieve data from a protected endpoint in the Web API via logging with a email and password.
+If you've been following along with this series you should have an ASP.NET Core Web API app which requires authorization in order to return data and a Xamarin.Forms app using the MSAL library. In the middle of those two is a configured Azure AD B2C Tenant and Application. 
 
-But having to create a brand new account linked to an username and password to use an app can be a pain - and actually is a deterent for people to use an app. Having the ability to create an account via an already existing account - such as Twitter or Facebook - lowers the barrier of entry. Not only does it let a third party have to worry about taking care of the username and passwords - it allows the user the ease of not having to create yet another password.
+And if you've really been following along - the Forms app should be able to retrieve data from a protected endpoint in the Web API via logging with a email and password.
+
+But having to create a brand new account linked to an username and password to use an app can be a pain - and actually is a deterrent for people to use an app. Having the ability to create an account via an already existing social network account - such as Twitter or Facebook - lowers the barrier of entry. 
+
+The benefits here are mutual. You don't have to worry about taking care of usernames and passwords, and your users don't have to worry about yet another password to manage.
 
 So let's look at the steps necessary to enable social authentication within our existing Azure AD B2C app.
 
@@ -14,19 +18,21 @@ So let's have at it!
 
 ## Twitter Configuration
 
-You can think of Azure AD B2C as providing an abstraction layer between your app and the various social networks. It takes care of the actual communication to the third party - such as Twitter. 
+In this scenario, you can think of Azure AD B2C as providing an abstraction layer between your app and the various social networks. It takes care of the actual communication to the third party - such as Twitter. And allows us to worry about providing a single endpoint to sign-in with (no matter how many social providers are configured).
 
-In order to make this all work, all we have to do is tell Twitter we have an app we want to integrate with Twitter (and as a side-effect use it as an identity provider), and then hook up some IDs that Twitter gives us to the Azure portal, so those two can talk.
+In order to make this all work, all we have to do is tell Twitter we have an app we want to integrate with Twitter. (A side-effect of the integration is being able to use Twitter as an identity provider.)
+
+Then the next step is to hook up some information that Twitter gives us to the Azure portal, so those two can talk.
 
 First things first then - we need to tell Twitter we have an app that we want to integrate with it.
 
-Hop on over to (apps.twitter.com)[https://msou.co/7x] and you will see a page that looks something like this:
+Hop on over to https://apps.twitter.com and you will see a page that looks something like this:
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513018295/social-auth-1_cww9kt.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_800/v1513018295/social-auth-1_cww9kt.png)
 
 You'll want to click the __Create New App__ button. The following screen will then appear:
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513018428/social-auth-2_xsotwe.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_800/v1513018428/social-auth-2_xsotwe.png)
 
 Here give it a name in the __Name__ field - and it's important to note that whatever name you give it will later be displayed by Twitter when it asks the user to login.
 
@@ -48,7 +54,7 @@ The 2 tabs we're initially interested in are _Keys and Access Tokens_ and _Permi
 
 For now, let's look at _Permissions_.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513019846/social-auth-4_aqghan.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_800/v1513019846/social-auth-4_aqghan.png)
 
 This is where we're telling Twitter what our app is going to be able to do to the user's account. Because we're only after identity providing - __Read only__ will more than suffice.
 
@@ -62,21 +68,21 @@ Here is where we perform some additions to integrate the Twitter provisioning we
 
 First up, select the __Identity Providers__ option from the left-hand side, and the following window will open.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513020512/social-auth-5_ls3rtn.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513020512/social-auth-5_ls3rtn.png)
 
 Notice how there are no _Social identity providers_ listed yet. Go ahead and click __Add__ and you'll see this screen.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513021512/social-auth-6_kpnhq7.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513021512/social-auth-6_kpnhq7.png)
 
 You have your pick of providers ... take Twitter. Then select _Set up this identity provider_. There you're going to see 2 boxes, __Client ID__ and __Client Secret__.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513022210/social-auth-7_dri02y.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513022210/social-auth-7_dri02y.png)
 
 Where do those 2 values come from?
 
 Back in the Twitter portal, under the _Keys and Access Tokens_ tab, there is a __Consumer Key (API Key)__ and __Consumer Secret (API Secret)__.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513022349/social-auth-3_isjegy.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_800/v1513022349/social-auth-3_isjegy.png)
 
 Those values map from the Twitter portal to the Azure portal as:
 
@@ -85,29 +91,31 @@ Those values map from the Twitter portal to the Azure portal as:
 
 So then we can fill out the rest of what's needed and save. And then we'll see that there is a value in the _Social identity providers_ section.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513022975/social-auth-8_kgqrro.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513022975/social-auth-8_kgqrro.png)
 
 ### Updating the Policy
 
 Associating a Twitter application with the Tenant isn't enough to actually enable the social authentication. We need to update the policy that our mobile app is invoking so it allows the social authentication.
 
-Select __Sign-up or sign-in policies__ from the left-hand side to view the various policies created that allow signing up or signing in (there should only be )one).
+Select __Sign-up or sign-in policies__ from the left-hand side to view the various policies created that allow signing up or signing in (there should only be one).
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513023145/Screen_Shot_2017-12-11_at_2.10.42_PM_mtfvec.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513023145/Screen_Shot_2017-12-11_at_2.10.42_PM_mtfvec.png)
 
 Select the one you want to add the Twitter authentication to, and you should see the screen like the one below.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513023212/social-auth-9_ejnw3y.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513023212/social-auth-9_ejnw3y.png)
 
 Click the __Edit__ button.
 
 A new blade will open that will allow you to update many options of the policy, we want the __Identity providers__.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513023256/social-auth-10_fjtbux.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513023256/social-auth-10_fjtbux.png)
 
 Clicking on that will show all of the identity providers configured within the Tenant. Go ahead and select the newly created one for Twitter.
 
 ![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1513023358/social-auth-11_ll93li.png)
+
+> Note that the existing __Email signup__ is still selected. This gives the user the option to pick which method to use to signup, Twitter or create a new username/password.
 
 Save everything on your way out - and that's all there is to enabling Azure AD B2C to use a social service as an identity provider!!
 
@@ -121,53 +129,68 @@ So here's what the various screens look like.
 
 ### The Sign-In:
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513023614/social-auth-12_bzke58.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513023614/social-auth-12_bzke58.png)
 
-Here if the user does not have an account, and they want to sign-in with Twitter, they should still hit the Twitter button. MSAL will create an account for them. The default webview screen isn't very clear here.
+I want to point something out because the webview screen isn't very clear here.
+
+If the user wants to use Twitter and needs to create an account, they _should_ click Twitter.
+
+They _do not_ have to click the __Sign up now__ link to create an account with __Twitter__ logins.
 
 ### The Twitter Login:
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513023854/social-auth-13_gf7tvb.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513023854/social-auth-13_gf7tvb.png)
 
 Here the user is presented with a web page from Twitter. It has the name of the app, as was entered on the Twitter Apps site, the company's URL also entered there, and also shows the permissions the app is asking for.
 
 ### 2-Factor Auth
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513023951/social-auth-14_gbj9gw.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513023951/social-auth-14_gbj9gw.png)
 
 If you have Twitter 2-Factor authentication enabled, you'll get prompted here as well. It's a full sign-in.
 
 ### Double Make Sure 
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513024023/social-auth-15_spikel.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513024023/social-auth-15_spikel.png)
 
 It's a full sign-in, so Twitter is double making sure you want to give access to the app.
 
 ### Collect Additional Info
 
-![](http://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513024100/social-auth-16_w0bt83.png)
+![](http://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513024100/social-auth-16_w0bt83.png)
 
 Remember when we defined the _Sign-in or Sign-up_ policy, we also defined some user attributes we wanted the application to collect?
 
-Well, you don't have to remember - cuz I helpfully attached a screenshot for you! :)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513024231/Screen_Shot_2017-12-11_at_2.29.13_PM_r4rn8o.png)
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513024231/Screen_Shot_2017-12-11_at_2.29.13_PM_r4rn8o.png)
+Well, you don't have to remember - cuz I helpfully attached a screenshot for you! :)
 
 So we told Azure AD B2C to collect a __Display Name__, an __Email Address__, and a __Job Title__.
 
 Well, the __Display Name__ is going to come from Twitter (it's going to be the user's handle). So now Azure AD B2C is prompting the user for the other 2 attributes we said we need.
 
+> A special note from me to you ... this whole process of using webviews to do sign-ins/sign-ups with a 3rd party identification provider such as Twitter is a bit messy.
+
+> I have it on good word the Azure AD B2C team has it on their radar to clean this up to allow a client-side flow, where the screens are presented by our app.
+
+> To help bump that on their priority list, go to [UserVoice](https://msou.co/8a) and enter it.
+
 ### All Done!
 
 Now we have all the info and the app allows the user to proceed and download data.
 
-In fact, we can even see that the new user has been added to the backing Active Directory by finding the Active Directory in the _All Resources_ panel of the Azure Portal and selecting it.
+In fact, we can even see that the new user has been added to the backing Active Directory by going back to the main blade of the Tenant and selecting __Users and Groups__.
 
-Select __Users and Groups__ -> __Users__ and you'll see a full roster of users.
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_600/v1513175565/Screen_Shot_2017-12-13_at_8.31.31_AM_cjlsz8.png)
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1513024483/Screen_Shot_2017-12-11_at_2.33.44_PM_kxgkvx.png)
+Then select __All Users__...
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_600/v1513120587/Screen_Shot_2017-12-12_at_5.15.55_PM_mbpzuk.png)
 
-And sure enough (@codemillmatt)[https://twitter.com/codemillmatt] has been added as a user.
+...and you'll see a full roster of users.
+
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_800/v1513024483/Screen_Shot_2017-12-11_at_2.33.44_PM_kxgkvx.png)
+
+And sure enough [@codemillmatt](https://twitter.com/codemillmatt) has been added as a user.
 
 ## Conclusion
 

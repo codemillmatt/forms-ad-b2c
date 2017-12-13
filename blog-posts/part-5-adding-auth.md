@@ -6,7 +6,7 @@ In other words - we're at the post with the very official, and very long, title 
 
 In the first couple of posts, we learned what [Azure AD B2C is](https://msou.co/6z), how to [create a Tenant](https://msou.co/60) (which I found a bit tricky, I even created a [video](https://msou.co/7g) to help explain it), then took a quick detour to find out how to [invoke a Web API](https://msou.co/61) from a Xamarin.Forms app - and that's going to be our backing service which will be "protected". Then in the [final post before this one](https://msou.co/7j), we learned what everything is inside of Azure AD B2C... and how it relates together. And the info from that post is going to come in very handy here!
 
-In order to get this all to work, there are 3 parts we have to go through.
+In order to get this all to work, there are 4 parts we have to go through.
 
 1. Configure our Azure AD B2C tenant in the portal
 1. Create the Azure AD B2C application within portal.
@@ -28,23 +28,23 @@ We need to do some work in the portal. I'm going to go relatively fast through a
 
 First up - log in to the portal, and select the appropriate directory from the dropdown in the upper left corner under your name:
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512490151/Screen_Shot_2017-12-05_at_10.08.21_AM_raaiwg.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512490151/Screen_Shot_2017-12-05_at_10.08.21_AM_raaiwg.png)
 
 Once there, select the Azure AD B2C option from the menu on the far left side:
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512490254/Screen_Shot_2017-12-05_at_10.10.29_AM_x2icov.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512490254/Screen_Shot_2017-12-05_at_10.10.29_AM_x2icov.png)
 
 We need to create a policy for the Azure AD B2C Tenant.
 
 Select __Sign-up or sign-in policies__ from the left-hand menu.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512491809/Screen_Shot_2017-12-05_at_10.36.28_AM_lv7ga7.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512491809/Screen_Shot_2017-12-05_at_10.36.28_AM_lv7ga7.png)
 
 Then click __Add__ in the blade that comes up.
 
 Here you're going to be able to configure quite a few options for the new policy.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512491917/Screen_Shot_2017-12-05_at_10.38.19_AM_vwj7wo.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512491917/Screen_Shot_2017-12-05_at_10.38.19_AM_vwj7wo.png)
 
 Give it a name you'll remember ... I chose _Generic Sign-up and Sign-In_.
 
@@ -54,11 +54,11 @@ Email signup allows a user to sign up and sign in using their email address and 
 
 The __Sign-up attributes__ declare what fields you want to have collected when a user registers for the app. Choose what you will.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1512589498/Screen_Shot_2017-12-06_at_1.44.06_PM_u63lns.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_600/v1512589498/Screen_Shot_2017-12-06_at_1.44.06_PM_u63lns.png)
 
 The __Application claims__ determines which of the __Sign-up attributes__ values will be returned to the mobile app _after_ the user signs-in.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_600/v1512743617/Screen_Shot_2017-12-08_at_8.33.06_AM_uvmomn.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_600/v1512743617/Screen_Shot_2017-12-08_at_8.33.06_AM_uvmomn.png)
 
 _Make sure you select the __User's Object ID__, that will be needed by the MSAL library._
 
@@ -72,7 +72,7 @@ Here you're going to be able to give your new Azure AD B2C application a name - 
 
 Then as you select __Yes__ to those options - a whole bunch of new options are going to appear ... so let's take a look at those one at a time.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512490746/Screen_Shot_2017-12-05_at_10.18.44_AM_ciygoj.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512490746/Screen_Shot_2017-12-05_at_10.18.44_AM_ciygoj.png)
 
 ### Web API Configuration
 
@@ -104,11 +104,11 @@ Now we want to add a scope to the Azure AD B2C application.
 
 Hit the __Published scopes (Preview)__ menu option. Then in the new blade enter anything you want - but make it descriptive so you know what it means. Remember, the idea behind scopes is to give _permission_ to the backend resource that's being protected.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512492882/Screen_Shot_2017-12-05_at_10.54.26_AM_oq2fok.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512492882/Screen_Shot_2017-12-05_at_10.54.26_AM_oq2fok.png)
 
 ### API Access
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512745345/Screen_Shot_2017-12-08_at_9.01.52_AM_wcr9te.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512745345/Screen_Shot_2017-12-08_at_9.01.52_AM_wcr9te.png)
 
 Now to enable API Access. Hit the __API Access (Preview)__ menu option right above the scopes one, click __Add__, and then the available API should be your Azure AD B2C name.
 
@@ -138,7 +138,7 @@ The new portion of the file will look like:
 
 The __Tenant__ comes from the main blade of the Azure AD B2C tenant, found via the __Overview__ option on the left, and __Domain Name__ on the right.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1512745601/Screen_Shot_2017-12-08_at_9.06.22_AM_cydshi.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1512745601/Screen_Shot_2017-12-08_at_9.06.22_AM_cydshi.png)
 
 The __Client ID__ comes from the application's page we just created. And the policy is, of course, the policy we created above.
 
@@ -395,15 +395,15 @@ Here's 3 screenshots from the app running on iOS.
 
 The first is showing the Login button. 
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.29_uz4iui.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.29_uz4iui.png)
 
 The second is the screen which appears after the login button is pressed - this gives the user the ability to sign-in if they already have an account - or to create a new account.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.45_p7quev.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.45_p7quev.png)
 
 And finally, the third screen allows the user to create a new account. Notice the __Display Name__ and __Job Title__ fields, those are from the __User Attributes__ portion of the __Sign Up and Sign In__ policy.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.52_evxkd5.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_650/v1512687821/Simulator_Screen_Shot_-_iPhone_6s_-_2017-12-07_at_17.01.52_evxkd5.png)
 
 ### Some Quick Notes
 
