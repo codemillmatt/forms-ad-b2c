@@ -14,6 +14,6 @@
         </ListView>
     </ContentPage.Content>
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Login" Command="{Binding LoginCommand}" IsEnabled="{Binding LoggedOut}" />
+        <ToolbarItem Text="Login" Command="{Binding LoginCommand}" />
     </ContentPage.ToolbarItems>
 </ContentPage>

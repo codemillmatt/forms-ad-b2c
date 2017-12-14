@@ -11,6 +11,7 @@ using Android.OS;
 using TheReviewer.Core;
 
 using Microsoft.Identity.Client;
+using Xamarin.Forms;
 
 namespace TheReviewer.Droid
 {
@@ -28,7 +29,8 @@ namespace TheReviewer.Droid
 
             LoadApplication(new App());
 
-            App.UiParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
+            var login = DependencyService.Get<IIdentityService>(DependencyFetchTarget.GlobalInstance);
+            login.UIParent = new UIParent(this);
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
