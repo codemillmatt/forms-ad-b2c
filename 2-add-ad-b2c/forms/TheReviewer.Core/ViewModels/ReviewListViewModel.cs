@@ -17,31 +17,28 @@ namespace TheReviewer.Core
 {
     public class ReviewListViewModel : BaseViewModel
     {
-        string location = "http://localhost:5000";
-        //string location = "http://thereviewer.azurewebsites.net";
+        //string location = "http://localhost:5000";
+        string location = "http://thereviewer.azurewebsites.net";
+
+        IIdentityService login;
+
+        string accessToken;
 
         public ReviewListViewModel()
         {
+            login = DependencyService.Get<IIdentityService>(DependencyFetchTarget.GlobalInstance);
+
             Title = "All Reviews";
-        }
 
-        public async Task<AuthenticationResult> SilentSignIn()
-        {
-            try
+            Task.Run(async () =>
             {
-                // ** NOTE: This will not work with iOS 10 & 11 on the simulator, best to use a real device **
-                var resp = await App.AuthClient.AcquireTokenSilentAsync(App.Scopes,
-                                     GetUserByPolicy(App.AuthClient.Users, App.SignUpAndInPolicy),
-                                     App.Authority, false);
-                LoggedOut = false;
+                var result = await login.GetCachedSignInToken();
+                accessToken = result?.AccessToken;
+                LoggedOut = string.IsNullOrWhiteSpace(accessToken);
 
-                return resp;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return null;
-            }
+                if (!LoggedOut)
+                    RefreshCommand.Execute(null);
+            });
         }
 
         bool _loggedOut = true;
@@ -51,6 +48,7 @@ namespace TheReviewer.Core
             set
             {
                 SetProperty(ref _loggedOut, value);
+                LoginCommand.ChangeCanExecute();
             }
         }
 
@@ -60,37 +58,18 @@ namespace TheReviewer.Core
         public Command RefreshCommand => _refreshCommand ??
         (_refreshCommand = new Command(async () =>
         {
+            if (LoggedOut)
+            {
+                IsBusy = false;
+                return;
+            }
+
             try
             {
-                // If running on the simulator, comment out the next 6 lines
-                var authResult = await SilentSignIn();
-                if (authResult == null)
-                {
-                    await Application.Current.MainPage.DisplayAlert("Not logged in", "Please log in to get data", "OK");
-                    return;
-                }
+                var allReviews = await DownloadAllReviews();
 
-                // Uncomment the below to run on the simulator
-                //var authResult = await App.AuthClient.AcquireTokenAsync(App.Scopes,
-                //GetUserByPolicy(App.AuthClient.Users, App.SignUpAndInPolicy),
-                //App.UiParent);
-
-
-                var baseAddr = new Uri(location);
-                var client = new HttpClient { BaseAddress = baseAddr };
-
-                var reviewUri = new Uri(baseAddr, "api/reviews");
-                var request = new HttpRequestMessage(HttpMethod.Get, reviewUri);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-
-                var response = await client.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-
-                var reviewJson = await response.Content.ReadAsStringAsync();
-
-                var allReviews = JsonConvert.DeserializeObject<List<Review>>(reviewJson);
-
-                AllReviews.AddRange(allReviews);
+                if (allReviews != null)
+                    AllReviews.AddRange(allReviews);
             }
             catch (Exception ex)
             {
@@ -102,6 +81,34 @@ namespace TheReviewer.Core
             }
         }));
 
+        async Task<List<Review>> DownloadAllReviews()
+        {
+            try
+            {
+                var baseAddr = new Uri(location);
+                var client = new HttpClient { BaseAddress = baseAddr };
+
+                var reviewUri = new Uri(baseAddr, "api/reviews");
+                var request = new HttpRequestMessage(HttpMethod.Get, reviewUri);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var reviewJson = await response.Content.ReadAsStringAsync();
+
+                var allReviews = JsonConvert.DeserializeObject<List<Review>>(reviewJson);
+
+                return allReviews;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+
+                return null;
+            }
+        }
+
         Command _loginCommand;
         public Command LoginCommand => _loginCommand ??
         (_loginCommand = new Command(async () =>
@@ -109,46 +116,16 @@ namespace TheReviewer.Core
             try
             {
                 // Calling the AD B2C sign in or sign up policy
-                var authResponse = await App.AuthClient.AcquireTokenAsync(App.Scopes,
-                                      GetUserByPolicy(App.AuthClient.Users, App.SignUpAndInPolicy),
-                                      App.UiParent);
+                var authResponse = await login.Login();
+                accessToken = authResponse?.AccessToken;
 
-                if (!string.IsNullOrEmpty(authResponse.AccessToken))
-                    LoggedOut = false;
+                LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
             }
             catch (Exception ex)
             {
                 LoggedOut = true;
                 Console.WriteLine(ex);
             }
-        }));
-
-        IUser GetUserByPolicy(IEnumerable<IUser> users, string policy)
-        {
-            foreach (var user in users)
-            {
-                string userIdentifier = Base64UrlDecode(user.Identifier.Split('.')[0]);
-                if (userIdentifier.EndsWith(policy.ToLower(), StringComparison.OrdinalIgnoreCase)) return user;
-            }
-
-            return null;
-        }
-
-        string Base64UrlDecode(string s)
-        {
-            s = s.Replace('-', '+').Replace('_', '/');
-            s = s.PadRight(s.Length + (4 - s.Length % 4) % 4, '=');
-            var byteArray = Convert.FromBase64String(s);
-            var decoded = Encoding.UTF8.GetString(byteArray, 0, byteArray.Count());
-            return decoded;
-        }
-
-        JObject ParseIdToken(string idToken)
-        {
-            // Get the piece with actual user info
-            idToken = idToken.Split('.')[1];
-            idToken = Base64UrlDecode(idToken);
-            return JObject.Parse(idToken);
-        }
+        }, () => LoggedOut));
     }
 }
