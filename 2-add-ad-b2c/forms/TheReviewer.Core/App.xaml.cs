@@ -13,7 +13,7 @@ namespace TheReviewer.Core
         public static string ClientID = "978f6a35-db30-44fd-8544-b7cc40466adc";
         public static string SignUpAndInPolicy = "B2C_1_GenericSignUpAndIn";
 
-        public static string[] Scopes = new string[] { "https://asdf.com/rvw.read.only" };
+        public static string[] Scopes = new string[] { "https://TheReviewer.onmicrosoft.com/backend/rvw.read.only" };
         public static string ApiEndpoint = "http://thereviewer.azurewebsites.net/api/reviews";
 
         public static string AuthorityBase = $"https://login.microsoftonline.com/tfp/{Tenant}/";
