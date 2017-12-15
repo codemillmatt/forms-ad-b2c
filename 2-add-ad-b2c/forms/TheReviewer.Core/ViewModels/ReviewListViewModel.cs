@@ -34,7 +34,7 @@ namespace TheReviewer.Core
             {
                 var result = await login.GetCachedSignInToken();
                 accessToken = result?.AccessToken;
-                LoggedOut = string.IsNullOrWhiteSpace(result?.AccessToken);
+                LoggedOut = string.IsNullOrWhiteSpace(accessToken);
 
                 if (!LoggedOut)
                     RefreshCommand.Execute(null);
@@ -59,8 +59,30 @@ namespace TheReviewer.Core
         (_refreshCommand = new Command(async () =>
         {
             if (LoggedOut)
+            {
+                IsBusy = false;
                 return;
+            }
 
+            try
+            {
+                var allReviews = await DownloadAllReviews();
+
+                if (allReviews != null)
+                    AllReviews.AddRange(allReviews);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }));
+
+        async Task<List<Review>> DownloadAllReviews()
+        {
             try
             {
                 var baseAddr = new Uri(location);
@@ -77,17 +99,15 @@ namespace TheReviewer.Core
 
                 var allReviews = JsonConvert.DeserializeObject<List<Review>>(reviewJson);
 
-                AllReviews.AddRange(allReviews);
+                return allReviews;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+
+                return null;
             }
-            finally
-            {
-                IsBusy = false;
-            }
-        }));
+        }
 
         Command _loginCommand;
         public Command LoginCommand => _loginCommand ??
@@ -96,9 +116,8 @@ namespace TheReviewer.Core
             try
             {
                 // Calling the AD B2C sign in or sign up policy
-                var login = DependencyService.Get<IIdentityService>(DependencyFetchTarget.GlobalInstance);
                 var authResponse = await login.Login();
-                accessToken = authResponse.AccessToken;
+                accessToken = authResponse?.AccessToken;
 
                 LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
             }

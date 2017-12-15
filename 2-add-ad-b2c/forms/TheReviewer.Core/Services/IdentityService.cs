@@ -13,25 +13,15 @@ namespace TheReviewer.Core
 {
     public class IdentityService : IIdentityService
     {
-        // All of the below must be setup according to values in your AD B2C tenant and application
-        static readonly string tenant = "TheReviewer.OnMicrosoft.com";
-        static readonly string clientId = "978f6a35-db30-44fd-8544-b7cc40466adc";
-        static readonly string[] applicationScopes = new string[] { $"https://{tenant}/backend/rvw.read.only" };
-        static readonly string authorityBaseUrl = $"https://login.microsoftonline.com/tfp/{tenant}";
-
-        static readonly string signInUpPolicy = "B2C_1_GenericSignUpAndIn";
-
-        static readonly string signInUpAuthority = $"{authorityBaseUrl}/{signInUpPolicy}";
-
         readonly PublicClientApplication msaClient;
 
         public IdentityService()
         {
-            msaClient = new PublicClientApplication(clientId);
+            msaClient = new PublicClientApplication(ADB2C_Constants.ClientId);
             msaClient.ValidateAuthority = false;
 
             // This needs to match what was entered in the portal under the Native Client redirect Url
-            msaClient.RedirectUri = $"msal{clientId}://auth";
+            msaClient.RedirectUri = ADB2C_Constants.MSALRedirectUri;
         }
 
         UIParent parent;
@@ -41,7 +31,8 @@ namespace TheReviewer.Core
         {
             AuthenticationResult result = null;
 
-            if (Device.RuntimePlatform == Device.Android && UIParent == null)
+            // Running on Android - we need UIParent to be set to the main Activity
+            if (UIParent == null && Device.RuntimePlatform == Device.Android)
                 return result;
 
             // First check if the token happens to be cached - grab silently
@@ -51,9 +42,21 @@ namespace TheReviewer.Core
                 return result;
 
             // Token not in cache - call adb2c to acquire it
-            result = await msaClient.AcquireTokenAsync(applicationScopes, GetUserByPolicy(msaClient.Users, signInUpPolicy),
-                                                       UIBehavior.ForceLogin, null, null, signInUpAuthority, UIParent);
-
+            try
+            {
+                result = await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
+                                                           GetUserByPolicy(msaClient.Users,
+                                                                           ADB2C_Constants.SignInUpPolicy),
+                                                           UIBehavior.ForceLogin,
+                                                           null,
+                                                           null,
+                                                           ADB2C_Constants.SignInUpAuthority,
+                                                           UIParent);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             return result;
         }
@@ -62,8 +65,12 @@ namespace TheReviewer.Core
         {
             try
             {
-                return await msaClient.AcquireTokenSilentAsync(applicationScopes, GetUserByPolicy(msaClient.Users, signInUpPolicy),
-                                                               signInUpAuthority, false);
+                // This checks to see if there's already a user in the cache
+                return await msaClient.AcquireTokenSilentAsync(ADB2C_Constants.ApplicationScopes,
+                                                               GetUserByPolicy(msaClient.Users,
+                                                                               ADB2C_Constants.SignInUpPolicy),
+                                                               ADB2C_Constants.SignInUpAuthority,
+                                                               false);
             }
             catch (MsalUiRequiredException ex)
             {
