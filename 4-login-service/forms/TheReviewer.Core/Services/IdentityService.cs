@@ -53,6 +53,22 @@ namespace TheReviewer.Core
                                                            ADB2C_Constants.SignInUpAuthority,
                                                            UIParent);
             }
+            catch (MsalServiceException ex)
+            {
+                if (ex.ErrorCode == MsalClientException.AuthenticationCanceledError)
+                {
+                    Console.WriteLine("User cancelled");
+                }
+                else if (ex.ErrorCode == "access_denied") // yeah, there's not a constant in the library for this
+                {
+                    // most likely the forgot password was hit
+                    Console.WriteLine("Forgot password");
+                }
+                else
+                {
+                    Console.WriteLine(ex);
+                }
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
@@ -79,6 +95,14 @@ namespace TheReviewer.Core
             }
 
             return null;
+        }
+
+        public void Logout()
+        {
+            foreach (var user in msaClient.Users)
+            {
+                msaClient.Remove(user);
+            }
         }
 
         IUser GetUserByPolicy(IEnumerable<IUser> users, string policy)

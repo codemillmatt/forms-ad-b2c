@@ -5,15 +5,34 @@
     x:Class="TheReviewer.Core.ReviewListPage"
     Title="{Binding Title}">
     <ContentPage.Content>
-        <ListView ItemsSource="{Binding AllReviews}" IsRefreshing="{Binding IsBusy}" IsPullToRefreshEnabled="true" RefreshCommand="{Binding RefreshCommand}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextCell Text="{Binding Text}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView 
+                ItemsSource="{Binding AllReviews}" 
+                IsRefreshing="{Binding IsBusy}" 
+                IsPullToRefreshEnabled="true" 
+                RefreshCommand="{Binding RefreshCommand}"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Grid.Row="0">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding Text}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Text="Login" Command="{Binding LoginCommand}" Grid.Row="1" Grid.Column="0" />
+            <Button Text="Logout" Command="{Binding LogoutCommand}" Grid.Row="1" Grid.Column="1" />
+        </Grid>
+
     </ContentPage.Content>
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Login" Command="{Binding LoginCommand}" />
-    </ContentPage.ToolbarItems>
 </ContentPage>

@@ -37,7 +37,9 @@ namespace TheReviewer.Core
                 LoggedOut = string.IsNullOrWhiteSpace(accessToken);
 
                 if (!LoggedOut)
+                {
                     RefreshCommand.Execute(null);
+                }
             });
         }
 
@@ -49,6 +51,7 @@ namespace TheReviewer.Core
             {
                 SetProperty(ref _loggedOut, value);
                 LoginCommand.ChangeCanExecute();
+                LogoutCommand.ChangeCanExecute();
             }
         }
 
@@ -61,6 +64,7 @@ namespace TheReviewer.Core
             if (LoggedOut)
             {
                 IsBusy = false;
+                await Application.Current.MainPage.DisplayAlert("Not signed in", "You're not signed in! Login and try again", "OK");
                 return;
             }
 
@@ -127,5 +131,14 @@ namespace TheReviewer.Core
                 Console.WriteLine(ex);
             }
         }, () => LoggedOut));
+
+        Command _logoutCommand;
+        public Command LogoutCommand => _logoutCommand ??
+            (_logoutCommand = new Command(() =>
+        {
+            login.Logout();
+            accessToken = string.Empty;
+            LoggedOut = true;
+        }, () => !LoggedOut));
     }
 }
