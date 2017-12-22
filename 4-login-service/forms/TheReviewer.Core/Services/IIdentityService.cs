@@ -8,6 +8,7 @@ namespace TheReviewer.Core
     {
         Task<AuthenticationResult> Login();
         Task<AuthenticationResult> GetCachedSignInToken();
+        void Logout();
         UIParent UIParent { get; set; }
     }
 }
