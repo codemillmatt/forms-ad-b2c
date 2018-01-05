@@ -35,4 +35,8 @@
         </Grid>
 
     </ContentPage.Content>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Reset Password" Command="{Binding ResetPasswordCommand}" />
+        <ToolbarItem Text="Edit Profile" Command="{Binding EditProfileCommand}" />
+    </ContentPage.ToolbarItems>
 </ContentPage>

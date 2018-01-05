@@ -121,6 +121,7 @@ namespace TheReviewer.Core
             {
                 // Calling the AD B2C sign in or sign up policy
                 var authResponse = await login.Login();
+
                 accessToken = authResponse?.AccessToken;
 
                 LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
@@ -140,5 +141,19 @@ namespace TheReviewer.Core
             accessToken = string.Empty;
             LoggedOut = true;
         }, () => !LoggedOut));
+
+        Command _resetPasswordCommand;
+        public Command ResetPasswordCommand => _resetPasswordCommand ??
+        (_resetPasswordCommand = new Command(async () =>
+        {
+            await login.ResetPassword();
+        }));
+
+        Command _editProfileCommand;
+        public Command EditProfileCommand => _editProfileCommand ??
+        (_editProfileCommand = new Command(async () =>
+        {
+            await login.EditProfile();
+        }));
     }
 }
