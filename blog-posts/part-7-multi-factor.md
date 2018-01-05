@@ -19,9 +19,10 @@ By the end of the series of tutorials, you'll have a solid understanding of not 
 
 - Part 7 - Multi-Factor Authentication - this post!!
 - Part 8 - Change the Look and Feel of the Pages Displayed in the WebViews
-- Part 9 - Adding Azure AD B2C Authentication and Authorization to Azure App Services
-- Part 10 - Understanding Scopes and Using the Microsoft Graph for Super Duper Lock Down
-- Part 11 - Putting Everything All Together
+- Part 9 - Ability to Reset Passwords and Edit Profiles
+- Part 10 - Adding Azure AD B2C Authentication and Authorization to Azure App Services
+- Part 11 - Understanding Scopes and Using the Microsoft Graph for Super Duper Lock Down
+- Part 12 - Putting Everything All Together
 
 The good news is that this post and the next two are done purely in the Azure Portal, so there will be no code changes to either our Web API or Xamarin.Forms app. So these posts will mostly be follow along.
 
