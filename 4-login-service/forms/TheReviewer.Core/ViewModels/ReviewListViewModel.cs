@@ -12,6 +12,7 @@ using System.Text;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace TheReviewer.Core
 {
@@ -30,17 +31,20 @@ namespace TheReviewer.Core
 
             Title = "All Reviews";
 
-            Task.Run(async () =>
-            {
-                var result = await login.GetCachedSignInToken();
-                accessToken = result?.AccessToken;
-                LoggedOut = string.IsNullOrWhiteSpace(accessToken);
+            AllReviews = new ObservableCollection<Review>();
 
-                if (!LoggedOut)
-                {
-                    RefreshCommand.Execute(null);
-                }
-            });
+
+            //Task.Run(async () =>
+            //{
+            //    var result = await login.GetCachedSignInToken();
+            //    accessToken = result?.AccessToken;
+            //    LoggedOut = string.IsNullOrWhiteSpace(accessToken);
+
+            //    if (!LoggedOut)
+            //    {
+            //        RefreshCommand.Execute(null);
+            //    }
+            //});
         }
 
         bool _loggedOut = true;
@@ -55,7 +59,7 @@ namespace TheReviewer.Core
             }
         }
 
-        public ObservableRangeCollection<Review> AllReviews { get; set; } = new ObservableRangeCollection<Review>();
+        public ObservableCollection<Review> AllReviews { get; set; }
 
         Command _refreshCommand;
         public Command RefreshCommand => _refreshCommand ??
@@ -63,8 +67,8 @@ namespace TheReviewer.Core
         {
             if (LoggedOut)
             {
-                IsBusy = false;
                 await Application.Current.MainPage.DisplayAlert("Not signed in", "You're not signed in! Login and try again", "OK");
+                IsBusy = false;
                 return;
             }
 
@@ -73,7 +77,12 @@ namespace TheReviewer.Core
                 var allReviews = await DownloadAllReviews();
 
                 if (allReviews != null)
-                    AllReviews.AddRange(allReviews);
+                {
+                    foreach (var review in allReviews)
+                    {
+                        AllReviews.Add(review);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -140,6 +149,9 @@ namespace TheReviewer.Core
             login.Logout();
             accessToken = string.Empty;
             LoggedOut = true;
+
+            AllReviews.Clear();
+
         }, () => !LoggedOut));
 
         Command _resetPasswordCommand;
