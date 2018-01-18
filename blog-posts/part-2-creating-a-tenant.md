@@ -44,7 +44,7 @@ Right?
 
 ![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1509459670/5_hqkmbd.png)
 
-Whhhaaa?!? An error message is part of the setup process? Yeah. 
+Whhhaaa?!? An error message is part of the setup process? Yeah.
 
 So what's going to happen after you hit the create button in the last step is the Tenant will successfully get created. Yay! But since it is its own Active Directory ... it's not going to show up in the default Azure portal you normally log into. We can get them linked - and that's what this error message (well, warning technically) is telling us.
 

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.codemilltech.TheReviewer">
+	<uses-sdk android:minSdkVersion="15" />
+	<application android:label="TheReviewer">
+		<activity android:name="microsoft.identity.client.BrowserTabActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="msal978f6a35-db30-44fd-8544-b7cc40466adc" android:host="auth" />
+			</intent-filter>
+		</activity>
+	</application>
+</manifest>
