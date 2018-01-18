@@ -1,20 +1,40 @@
 Serverless computing is hot, hot, hot! And for good reason - it gives us a way to create focused and stateless microservices that solve exactly one problem without having to create a monolithic application and maintain a server.
 
-In other words, they are perfect in a mobile app scenario!
+In other words, they are perfect in a mobile app scenario! 
 
 # Adding Azure AD B2C Authentication to Azure Functions
 
-Azure's serverless offering is called Azure Functions and one way to invoke them is via HTTP requests. Since these functions will be open to the web at large, we'll eventually have a need to require a calling user be authorized in order to invoke them.
+Azure's serverless offering is called [Azure Functions](https://msou.co/baj) and one way to invoke them is via [HTTP requests](https://msou.co/bai). Since these functions will be open to the web at large, we'll eventually have a need to require a calling user be authorized in order to invoke them.
 
-And that's what this article is all about ... adding authentication and authorization to Azure Functions via Azure AD B2C.
+And that's what this article is all about ... adding authentication and authorization to Azure Functions via [Azure AD B2C](https://msou.co/bak).
+
+In this article we'll walk through the following:
+
+- The steps necessary to create an Azure Function App that returns a simple JSON array
+- Invoking that function via an HTTP request
+- Configuring the Azure AD B2C application within the Tenant to provide authentication and authorization to that function.
+- Configuring the Azure Function App to use Authentication and Authorization from Azure AD B2C
+- Then finally some minor changes to our Xamarin.Forms application to invoke the Function which requires authorization.
+
+And it should be noted that the technique discussed in this article will work for any of the Azure App Service offerings: [Web Apps](https://msou.co/bal), [Mobile Apps](https://msou.co/bam), [API App](https://msou.co/bal)...
+
+First thing first then - we need a Function!
 
 ## Creating the Function App
 
-Here I'll talk about the happy path of creating a function and will link to some more in-depth documentation.
+There's going to be 2 parts to creating the Function App ... the first part will be the actual scaffolding of it within the portal, and the second will be the code.
 
-I'll also have a "deploy to azure" button that will create one for the reader.
+### Scaffolding the App Within the Portal
 
-The function that we'll be working with is simple - it will do the same thing as the ASP.NET Core Web API did - return reviews to be displayed in our Xamarin.Forms mobile app. 
+Go into the portal, click _Create a Resource_ then find _Function Apps_ and hit new.
+
+LOL, right ... that's missing some steps right?
+
+The easiest way is to follow the [great documentation here](https://msou.co/bai). These docs will show you how to create an HTTP Function within the portal - and that's exactly what we want!
+
+### The Function App Code
+
+The function that we'll be working with is simple - it will do the same thing as the [ASP.NET Core Web API did](https://msou.co/61) - return reviews to be displayed in our Xamarin.Forms mobile app.
 
 Right now everything is in _demo-mode_ so the `Review` class on the server looks like the following:
 
@@ -61,7 +81,7 @@ This gets invoked via an HTTP request. The easiest way to find the URL at which 
 
 And click on the _</>Get function URL_ button in the upper left.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/v1513199510/Screen_Shot_2017-12-13_at_3.11.25_PM_raq0uu.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000/v1513199510/Screen_Shot_2017-12-13_at_3.11.25_PM_raq0uu.png)
 
 You can then issue a __GET__ request against it in Postman (or a similar utility) to see the return value.
 
@@ -79,7 +99,7 @@ We're going to use that same Azure AD B2C Application here, this time adding in 
 
 The first thing to do is get the overall URL for the Function app. That's going to be on the main blade on of the Function app, under - you guessed it - _URL_.
 
-![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/c_scale,h_700/v1513200629/Screen_Shot_2017-12-13_at_3.29.37_PM_zhkiti.png)
+![](https://res.cloudinary.com/code-mill-technologies-inc/image/upload/bo_2px_solid_rgb:000000,c_scale,h_700/v1513200629/Screen_Shot_2017-12-13_at_3.29.37_PM_zhkiti.png)
 
 Copy that value and then open up the Azure AD B2C Application (remember, it'll be in a different directory, so you'll need to click on your name in the upper left to get a dropdown to appear).
 
@@ -95,7 +115,7 @@ Then in the __Reply URL__ field, the value will be of the following format:
 {YOUR-FUNCTION-APP-URL}/.auth/login/aad/callback
 ```
 
-_Make sure the URL you enter is HTTPS!_
+> Make sure the URL you enter is HTTPS!
 
 This is letting the Azure AD B2C Application know what URL to send authorization tokens to after authenticating users.
 
