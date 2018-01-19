@@ -137,15 +137,14 @@ namespace TheReviewer.Core
 
             try
             {
-                AuthenticationResult result =
-                    await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
-                               GetUserByPolicy(msaClient.Users,
-                                   ADB2C_Constants.EditProfilePolicy),
-                               UIBehavior.SelectAccount,
-                               null,
-                               null,
-                               ADB2C_Constants.EditProfileAuthority,
-                               UIParent);
+                result = await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
+                                                           GetUserByPolicy(msaClient.Users,
+                                                               ADB2C_Constants.EditProfilePolicy),
+                                                           UIBehavior.SelectAccount,
+                                                           null,
+                                                           null,
+                                                           ADB2C_Constants.EditProfileAuthority,
+                                                           UIParent);
             }
             catch (MsalServiceException ex)
             {
