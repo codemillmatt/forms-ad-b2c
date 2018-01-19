@@ -11,12 +11,6 @@ namespace TheReviewer.Core
         public static string SignInUpPolicy = "B2C_1_GenericSignUpAndIn";
         public static string SignInUpAuthority = $"{AuthorityBaseUrl}/{SignInUpPolicy}";
 
-        public static string ResetPasswordPolicy = "B2C_1_PasswordChange";
-        public static string ResetPasswordAuthority = $"{AuthorityBaseUrl}/{ResetPasswordPolicy}";
-
-        public static string EditProfilePolicy = "B2C_1_EditProfile";
-        public static string EditProfileAuthority = $"{AuthorityBaseUrl}/{EditProfilePolicy}";
-
         public static string MSALRedirectUri = $"msal{ClientId}://auth";
     }
 }

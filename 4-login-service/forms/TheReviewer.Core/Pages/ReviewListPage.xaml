@@ -22,7 +22,7 @@
                 RefreshCommand="{Binding RefreshCommand}"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
-                Grid.Row="0" Footer="">
+                Grid.Row="0">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <TextCell Text="{Binding Text}" />
@@ -35,8 +35,4 @@
         </Grid>
 
     </ContentPage.Content>
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Reset Password" Command="{Binding ResetPasswordCommand}" />
-        <ToolbarItem Text="Edit Profile" Command="{Binding EditProfileCommand}" />
-    </ContentPage.ToolbarItems>
 </ContentPage>
