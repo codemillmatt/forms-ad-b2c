@@ -28,23 +28,11 @@ namespace TheReviewer.Core
         public ReviewListViewModel()
         {
             login = DependencyService.Get<IIdentityService>(DependencyFetchTarget.GlobalInstance);
+            login.Logout(); // wiping everything to make sure we have a clean slate for demo purposes only!
 
             Title = "All Reviews";
 
             AllReviews = new ObservableCollection<Review>();
-
-
-            //Task.Run(async () =>
-            //{
-            //    var result = await login.GetCachedSignInToken();
-            //    accessToken = result?.AccessToken;
-            //    LoggedOut = string.IsNullOrWhiteSpace(accessToken);
-
-            //    if (!LoggedOut)
-            //    {
-            //        RefreshCommand.Execute(null);
-            //    }
-            //});
         }
 
         bool _loggedOut = true;
@@ -67,6 +55,7 @@ namespace TheReviewer.Core
         {
             if (LoggedOut)
             {
+
                 await Application.Current.MainPage.DisplayAlert("Not signed in", "You're not signed in! Login and try again", "OK");
                 IsBusy = false;
                 return;
@@ -158,14 +147,22 @@ namespace TheReviewer.Core
         public Command ResetPasswordCommand => _resetPasswordCommand ??
         (_resetPasswordCommand = new Command(async () =>
         {
-            await login.ResetPassword();
+            var authResponse = await login.ResetPassword();
+
+            accessToken = authResponse?.AccessToken;
+
+            LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
         }));
 
         Command _editProfileCommand;
         public Command EditProfileCommand => _editProfileCommand ??
         (_editProfileCommand = new Command(async () =>
         {
-            await login.EditProfile();
+            var authResponse = await login.EditProfile();
+
+            accessToken = authResponse?.AccessToken;
+
+            LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
         }));
     }
 }
