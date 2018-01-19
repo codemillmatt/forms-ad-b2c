@@ -117,10 +117,12 @@ namespace TheReviewer.Core
             catch (MsalServiceException ex)
             {
                 Console.WriteLine(ex);
+                Logout();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                Logout();
             }
 
             return result;
@@ -135,22 +137,25 @@ namespace TheReviewer.Core
 
             try
             {
-                result = await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
-                                                           GetUserByPolicy(msaClient.Users,
-                                                               ADB2C_Constants.EditProfilePolicy),
-                                                           UIBehavior.SelectAccount,
-                                                           null,
-                                                           null,
-                                                           ADB2C_Constants.EditProfileAuthority,
-                                                           UIParent);
+                AuthenticationResult result =
+                    await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
+                               GetUserByPolicy(msaClient.Users,
+                                   ADB2C_Constants.EditProfilePolicy),
+                               UIBehavior.SelectAccount,
+                               null,
+                               null,
+                               ADB2C_Constants.EditProfileAuthority,
+                               UIParent);
             }
             catch (MsalServiceException ex)
             {
                 Console.WriteLine(ex);
+                Logout();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                Logout();
             }
 
             return result;
