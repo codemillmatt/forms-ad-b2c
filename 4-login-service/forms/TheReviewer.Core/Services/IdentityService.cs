@@ -97,69 +97,6 @@ namespace TheReviewer.Core
             return null;
         }
 
-        public async Task<AuthenticationResult> ResetPassword()
-        {
-            AuthenticationResult result = null;
-
-            if (UIParent == null && Device.RuntimePlatform == Device.Android)
-                return result;
-
-            try
-            {
-                result = await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
-                                                           (IUser)null,
-                                                           UIBehavior.SelectAccount,
-                                                           null,
-                                                           null,
-                                                           ADB2C_Constants.ResetPasswordAuthority,
-                                                           UIParent);
-            }
-            catch (MsalServiceException ex)
-            {
-                Console.WriteLine(ex);
-                Logout();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                Logout();
-            }
-
-            return result;
-        }
-
-        public async Task<AuthenticationResult> EditProfile()
-        {
-            AuthenticationResult result = null;
-
-            if (UIParent == null && Device.RuntimePlatform == Device.Android)
-                return result;
-
-            try
-            {
-                result = await msaClient.AcquireTokenAsync(ADB2C_Constants.ApplicationScopes,
-                                                           GetUserByPolicy(msaClient.Users,
-                                                               ADB2C_Constants.EditProfilePolicy),
-                                                           UIBehavior.SelectAccount,
-                                                           null,
-                                                           null,
-                                                           ADB2C_Constants.EditProfileAuthority,
-                                                           UIParent);
-            }
-            catch (MsalServiceException ex)
-            {
-                Console.WriteLine(ex);
-                Logout();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                Logout();
-            }
-
-            return result;
-        }
-
         public void Logout()
         {
             foreach (var user in msaClient.Users)

@@ -12,7 +12,6 @@ using System.Text;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
 
 namespace TheReviewer.Core
 {
@@ -28,11 +27,20 @@ namespace TheReviewer.Core
         public ReviewListViewModel()
         {
             login = DependencyService.Get<IIdentityService>(DependencyFetchTarget.GlobalInstance);
-            login.Logout(); // wiping everything to make sure we have a clean slate for demo purposes only!
 
             Title = "All Reviews";
 
-            AllReviews = new ObservableCollection<Review>();
+            Task.Run(async () =>
+            {
+                var result = await login.GetCachedSignInToken();
+                accessToken = result?.AccessToken;
+                LoggedOut = string.IsNullOrWhiteSpace(accessToken);
+
+                if (!LoggedOut)
+                {
+                    RefreshCommand.Execute(null);
+                }
+            });
         }
 
         bool _loggedOut = true;
@@ -47,7 +55,7 @@ namespace TheReviewer.Core
             }
         }
 
-        public ObservableCollection<Review> AllReviews { get; set; }
+        public ObservableRangeCollection<Review> AllReviews { get; set; } = new ObservableRangeCollection<Review>();
 
         Command _refreshCommand;
         public Command RefreshCommand => _refreshCommand ??
@@ -55,9 +63,8 @@ namespace TheReviewer.Core
         {
             if (LoggedOut)
             {
-
-                await Application.Current.MainPage.DisplayAlert("Not signed in", "You're not signed in! Login and try again", "OK");
                 IsBusy = false;
+                await Application.Current.MainPage.DisplayAlert("Not signed in", "You're not signed in! Login and try again", "OK");
                 return;
             }
 
@@ -66,12 +73,7 @@ namespace TheReviewer.Core
                 var allReviews = await DownloadAllReviews();
 
                 if (allReviews != null)
-                {
-                    foreach (var review in allReviews)
-                    {
-                        AllReviews.Add(review);
-                    }
-                }
+                    AllReviews.AddRange(allReviews);
             }
             catch (Exception ex)
             {
@@ -119,7 +121,6 @@ namespace TheReviewer.Core
             {
                 // Calling the AD B2C sign in or sign up policy
                 var authResponse = await login.Login();
-
                 accessToken = authResponse?.AccessToken;
 
                 LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
@@ -138,31 +139,6 @@ namespace TheReviewer.Core
             login.Logout();
             accessToken = string.Empty;
             LoggedOut = true;
-
-            AllReviews.Clear();
-
         }, () => !LoggedOut));
-
-        Command _resetPasswordCommand;
-        public Command ResetPasswordCommand => _resetPasswordCommand ??
-        (_resetPasswordCommand = new Command(async () =>
-        {
-            var authResponse = await login.ResetPassword();
-
-            accessToken = authResponse?.AccessToken;
-
-            LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
-        }));
-
-        Command _editProfileCommand;
-        public Command EditProfileCommand => _editProfileCommand ??
-        (_editProfileCommand = new Command(async () =>
-        {
-            var authResponse = await login.EditProfile();
-
-            accessToken = authResponse?.AccessToken;
-
-            LoggedOut = string.IsNullOrWhiteSpace(authResponse?.AccessToken);
-        }));
     }
 }
