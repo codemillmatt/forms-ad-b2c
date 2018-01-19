@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage 
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+    x:Class="TheReviewer.Core.ReviewListPage"
+    Title="{Binding Title}">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView 
+                ItemsSource="{Binding AllReviews}" 
+                IsRefreshing="{Binding IsBusy}" 
+                IsPullToRefreshEnabled="true" 
+                RefreshCommand="{Binding RefreshCommand}"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Grid.Row="0" Footer="">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding Text}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Text="Login" Command="{Binding LoginCommand}" Grid.Row="1" Grid.Column="0" />
+            <Button Text="Logout" Command="{Binding LogoutCommand}" Grid.Row="1" Grid.Column="1" />
+        </Grid>
+
+    </ContentPage.Content>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Reset Password" Command="{Binding ResetPasswordCommand}" />
+        <ToolbarItem Text="Edit Profile" Command="{Binding EditProfileCommand}" />
+    </ContentPage.ToolbarItems>
+</ContentPage>
