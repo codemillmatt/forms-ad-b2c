@@ -14,7 +14,7 @@ html {
 
 body {
   background-attachment: fixed;
-  background-image: url("https://thereviewerfuncstorage.blob.core.windows.net/thereviewer-custom-pages/images/background-1.png");
+  background-image: url("https://thereviewerfuncstorage.blob.core.windows.net/thereviewer-custom-pages/images/BitMicrosoft.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -112,6 +112,14 @@ label,
 
 #FacebookExchange:hover {
     background-color: #354C86
+}
+
+#TwitterExchange
+{
+  background-color: #28B1E6;
+  background-size:50px;
+  background-repeat: no-repeat;
+  padding-left: 55px;
 }
 
 #forgotPassword {
